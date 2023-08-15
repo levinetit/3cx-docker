@@ -30,7 +30,7 @@ docker run \
     --cap-add SYS_ADMIN \
     --cap-add NET_ADMIN \
     --name 3cx \
-    farfui/3cx:18.0.3.450
+    levinetit/3cx:18.0.8.917
 
 3. Setup the timezone. You can find the full listing under "/usr/share/zoneinfo/".
 
@@ -46,8 +46,8 @@ build.sh - How this container was build
 ```bash
 #!/bin/bash
 
-VERSION=18.0.3.450
-USER=farfui
+VERSION=18.0.8.917
+USER=levinet
 
 docker rmi ${USER}/3cx:${VERSION}
 

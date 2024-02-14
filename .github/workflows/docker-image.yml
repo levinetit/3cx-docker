@@ -1,27 +1,35 @@
 name: Docker Image CI
 
 on:
-  push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
+ push:
+  branches: [ master ]
+ pull_request:
+  branches: [ master ]
 
 jobs:
 
-  build:
+ build:
 
-    runs-on: ubuntu-latest
+  runs-on: ubuntu-latest
 
-    steps:
-    - uses: actions/checkout@v4.1.1
-    - name: docker login
-      env:
-        DOCKER_USER: ${{secrets.DOCKER_USER}}
-        DOCKER_PASSWORD: ${{secrets.DOCKER_PASSWORD}}
-      run: |
-        docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
-    - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag ${{secrets.DOCKER_USER}}/3cx-docker:latest
+  steps:
+  - uses: actions/checkout@v4.1.1
+  - name: Docker Login (GHCR)
+  env:
+    GHCR_TOKEN: ${{secrets.GHCR_TOKEN}}
+  run: |
+    docker login ghcr.io -u ${{github.repository_owner}} -p $GHCR_TOKEN
+  - name: Docker Login
+   env:
+    DOCKER_USER: ${{secrets.DOCKER_USER}}
+    DOCKER_PASSWORD: ${{secrets.DOCKER_PASSWORD}}
+   run: |
+    docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
+  - name: Build the Docker image
+   run: docker build . --file Dockerfile --tag ${{secrets.DOCKER_USER}}/3cx-docker:latest
 
-    - name: Docker Push
-      run: docker push ${{secrets.DOCKER_USER}}/3cxdocker:latest
+  - name: Docker Push (GHCR)
+  run: docker push ghcr.io/${{github.repository_owner}}/3cx-docker:latest
+
+  - name: Docker Push
+   run: docker push ${{secrets.DOCKER_USER}}/3cx-docker:latest

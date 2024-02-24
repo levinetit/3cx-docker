@@ -1,6 +1,6 @@
-FROM debian:buster
+FROM debian:bookworm
 
-ARG DEBIAN_VERSION= buster
+ARG DEBIAN_VERSION=bookworm
 
 ENV container docker
 ENV LC_ALL C

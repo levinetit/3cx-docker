@@ -47,9 +47,9 @@ RUN apt-get update -y && apt-get upgrade -y \
     
 # Instalează 3CX PBX
 # RUN apt-get install -qq -y --no-install-recommends 3cxpbx \  
-RUN apt-get update -y && \
-    apt-get upgrade -y && \
-    apt-get install -y 3cxpbx net-tools
+RUN apt-get update -y \
+    && apt-get upgrade -y \
+    && apt-get install -y 3cxpbx
 
 EXPOSE 5015/tcp 5001/tcp 5060/tcp 5060/udp 5061/tcp 5090/tcp 5090/udp 9000-9500/udp
 

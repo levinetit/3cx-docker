@@ -1,43 +1,40 @@
 FROM debian:buster
-  
-ARG BUILD_STRING
-ARG BUILD_DATE
-ARG BUILD_TIME
 
-LABEL build.string $BUILD_STRING
-LABEL build.date   $BUILD_DATE
-LABEL build.time   $BUILD_TIME
+# pacotes necessários
+RUN apt-get update && apt-get install -y --allow-unauthenticated \
+    gnupg2 \
+    net-tools \
+    dphys-swapfile \
+    wget \
+    systemd \
+    systemd-sysv \
+    telnet \
+    vim \
+	nano \
+    dphys-swapfile \
+    libcurl3-gnutls \
+    libmediainfo0v5 \
+    libmms0 \
+    libnghttp2-14 \
+    librtmp1 \
+    libssh2-1 \
+    libtinyxml2-6a \
+    libzen0v5 \
+    && rm -rf /var/lib/apt/lists/*
 
-ENV DEBIAN_FRONTEND noninteractive
-ENV LANG en_US.UTF-8
-ENV LANGUAGE en
-ENV container docker
+# repositório 3CX PBX e Debian
+RUN wget -O- http://downloads.3cx.com/downloads/3cxpbx/public.key | apt-key add -
 
-RUN    apt-get update -y \
-    && apt-get upgrade -y \
-    && apt-get install -y --allow-unauthenticated \
-         apt-utils \
-         wget \
-         gnupg2 \
-         systemd \
-         locales \
-    && sed -i 's/\# \(en_US.UTF-8\)/\1/' /etc/locale.gen \
-    && locale-gen \
-    && wget -O- http://downloads-global.3cx.com/downloads/3cxpbx/public.key | apt-key add - \
-    && echo "deb http://downloads-global.3cx.com/downloads/debian buster main" | tee /etc/apt/sources.list.d/3cxpbx.list \
-    && apt-get update -y \
-    && apt-get install -y --allow-unauthenticated \
-       net-tools \
-       dphys-swapfile \
-       $(apt-cache depends 3cxpbx | grep Depends | sed "s/.*ends:\ //" | tr '\n' ' ') \
-    && rm -f /lib/systemd/system/multi-user.target.wants/* \
-    && rm -f /etc/systemd/system/*.wants/* \
-    && rm -f /lib/systemd/system/local-fs.target.wants/* \
-    && rm -f /lib/systemd/system/sockets.target.wants/*udev* \
-    && rm -f /lib/systemd/system/sockets.target.wants/*initctl* \
-    && rm -f /lib/systemd/system/basic.target.wants/* \
-    && rm -f /lib/systemd/system/anaconda.target.wants/*
+RUN echo "deb http://downloads-global.3cx.com/downloads/debian buster main" | tee /etc/apt/sources.list.d/3cxpbx.list
+
+RUN echo "deb http://deb.debian.org/debian/ bullseye main" >> /etc/apt/sources.list \
+    && echo "deb-src http://deb.debian.org/debian/ bullseye main" >> /etc/apt/sources.list
+
+RUN apt-get update
+
+RUN apt-get install 3cxpbx -y
 
 EXPOSE 5015/tcp 5001/tcp 5060/tcp 5060/udp 5061/tcp 5090/tcp 5090/udp 9000-9500/udp
 
+# iniciar systemd
 CMD ["/lib/systemd/systemd"]

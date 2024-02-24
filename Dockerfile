@@ -19,7 +19,6 @@ RUN apt-get update -y \
     libnghttp2-14 \
     librtmp1 \
     libssh2-1 \
-    libtinyxml2-6a \
     libzen0v5 \
     apt-transport-https \
     && rm -rf /var/lib/apt/lists/*

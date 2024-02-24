@@ -21,13 +21,13 @@ RUN apt-get update -y \
     libssh2-1 \
     libtinyxml2-6a \
     libzen0v5 \
-    apt-transport-https \
+    apt-transport-https
 
 # Adaugă cheia publică pentru 3CX PBX
 RUN wget -O- https://repo.3cx.com/key.pub | gpg --dearmor | sudo tee /usr/share/keyrings/3cx-archive-keyring.gpg > /dev/null
 
 # Adaugă repozitoriile
-RUN echo echo "deb [arch=amd64 by-hash=yes signed-by=/usr/share/keyrings/3cx-archive-keyring.gpg] http://repo.3cx.com/3cx bookworm main" | tee /etc/apt/sources.list.d/3cxpbx.list
+RUN echo "deb [arch=amd64 by-hash=yes signed-by=/usr/share/keyrings/3cx-archive-keyring.gpg] http://repo.3cx.com/3cx bookworm main" | tee /etc/apt/sources.list.d/3cxpbx.list \
     && echo "deb http://deb.debian.org/debian/ bookworm main" >> /etc/apt/sources.list \
     && echo "deb-src http://deb.debian.org/debian/ bookworm main" >> /etc/apt/sources.list
 

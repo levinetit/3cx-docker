@@ -1,4 +1,4 @@
-FROM debian:buster
+FROM debian:bookworm
 
 # Pachete necesare
 RUN apt-get update -y \
@@ -22,15 +22,14 @@ RUN apt-get update -y \
     libtinyxml2-6a \
     libzen0v5 \
     apt-transport-https \
-    && rm -rf /var/lib/apt/lists/*
 
 # Adaugă cheia publică pentru 3CX PBX
-RUN wget -O- http://downloads.3cx.com/downloads/3cxpbx/public.key | apt-key add -
+RUN wget -O- https://repo.3cx.com/key.pub | gpg --dearmor | sudo tee /usr/share/keyrings/3cx-archive-keyring.gpg > /dev/null
 
 # Adaugă repozitoriile
-RUN echo "deb http://downloads-global.3cx.com/downloads/debian buster main" | tee /etc/apt/sources.list.d/3cxpbx.list \
-    && echo "deb http://deb.debian.org/debian/ bullseye main" >> /etc/apt/sources.list \
-    && echo "deb-src http://deb.debian.org/debian/ bullseye main" >> /etc/apt/sources.list
+RUN echo echo "deb [arch=amd64 by-hash=yes signed-by=/usr/share/keyrings/3cx-archive-keyring.gpg] http://repo.3cx.com/3cx bookworm main" | tee /etc/apt/sources.list.d/3cxpbx.list
+    && echo "deb http://deb.debian.org/debian/ bookworm main" >> /etc/apt/sources.list \
+    && echo "deb-src http://deb.debian.org/debian/ bookworm main" >> /etc/apt/sources.list
 
 # Actualizează din nou pachetele înainte de instalarea 3CX PBX
 RUN apt-get update -y && apt-get upgrade -y

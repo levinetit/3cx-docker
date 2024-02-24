@@ -35,14 +35,18 @@ RUN wget -qO- https://repo.3cx.com/key.pub | gpg --dearmor > /usr/share/keyrings
 
 # Adaugă repozitoriile
 RUN echo "deb [arch=amd64 by-hash=yes signed-by=/usr/share/keyrings/3cx-archive-keyring.gpg] http://repo.3cx.com/3cx $DEBIAN_VERSION main" | tee /etc/apt/sources.list.d/3cxpbx.list \
-    && echo "deb http://deb.debian.org/debian/ $DEBIAN_VERSION main" >> /etc/apt/sources.list \
-    && echo "deb-src http://deb.debian.org/debian/ $DEBIAN_VERSION main" >> /etc/apt/sources.list
+    && echo "deb http://deb.debian.org/debian/ $DEBIAN_VERSION main"  | tee /etc/apt/sources.list \
+    && echo "deb-src http://deb.debian.org/debian/ $DEBIAN_VERSION main"  | tee /etc/apt/sources.list
 
 # Actualizează din nou pachetele înainte de instalarea 3CX PBX
-RUN apt-get update -y && apt-get upgrade -y \
+# RUN apt-get update -y && apt-get upgrade -y \
 
+RUN apt-get update -qq \
+    && apt-get upgrade -qq \
+    && apt-get install -qq -y --no-install-recommends 3cxpbx
+    
 # Instalează 3CX PBX
-RUN apt-get install -qq -y --no-install-recommends 3cxpbx \  
+# RUN apt-get install -qq -y --no-install-recommends 3cxpbx \  
 
 EXPOSE 5015/tcp 5001/tcp 5060/tcp 5060/udp 5061/tcp 5090/tcp 5090/udp 9000-9500/udp
 

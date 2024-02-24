@@ -91,9 +91,9 @@ jobs:
             ghcr.io/levinetit/3cx-docker:${{ env.package_version }}-${{ github.run_number }}
             ghcr.io/levinetit/3cx-docker:${{ env.package_version }}
             ghcr.io/levinetit/3cx-docker:latest
-            ${{ secrets.DOCKER_USER }}/3cx:latest
-            ${{ secrets.DOCKER_USER }}/3cx:${{ env.package_version }}
-            ${{ secrets.DOCKER_USER }}/3cx:${{ env.package_version }}-${{ github.run_number }}
+            ${{ secrets.DOCKER_USER }}/3cx-docker:latest
+            ${{ secrets.DOCKER_USER }}/3cx-docker:${{ env.package_version }}
+            ${{ secrets.DOCKER_USER }}/3cx-docker:${{ env.package_version }}-${{ github.run_number }}
 
       -
         name: Create Release
@@ -106,7 +106,7 @@ jobs:
           release_name: Release v${{ env.package_version }}-${{ github.run_number }}
           body: |
             3CX v${{ env.package_version }} docker image:
-            > docker run levinetit/3cx:${{ env.package_version }}
+            > docker run levinetit/3cx-docker:${{ env.package_version }}
             
             Changelog:
               ${{ env.changelog }}
@@ -125,7 +125,7 @@ jobs:
           prerelease: true
           body: |
             3CX v${{ env.package_version }}-test docker image:
-            > docker run ghcr.io/levinetit/3cx:${{ env.package_version }}-test
+            > docker run ghcr.io/levinetit/3cx-docker:${{ env.package_version }}-test
             
             Changelog:
               ${{ env.changelog }}

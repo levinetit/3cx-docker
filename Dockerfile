@@ -41,9 +41,7 @@ RUN echo "deb [arch=amd64 by-hash=yes signed-by=/usr/share/keyrings/3cx-archive-
 # Actualizează din nou pachetele înainte de instalarea 3CX PBX
 # RUN apt-get update -y && apt-get upgrade -y \
 
-RUN apt-get update -qq \
-    && apt-get upgrade -qq \
-    && apt-get install -qq -y --no-install-recommends 3cxpbx
+RUN apt-get install -y $(apt-cache depends 3cxpbx | grep Depends | sed "s/.*ends:\ //" | tr '\n' ' ')
     
 # Instalează 3CX PBX
 # RUN apt-get install -qq -y --no-install-recommends 3cxpbx \  

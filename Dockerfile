@@ -37,11 +37,16 @@ RUN wget -qO- https://repo.3cx.com/key.pub | gpg --dearmor > /usr/share/keyrings
 RUN echo "deb [arch=amd64 by-hash=yes signed-by=/usr/share/keyrings/3cx-archive-keyring.gpg] http://repo.3cx.com/3cx $DEBIAN_VERSION main" | tee /etc/apt/sources.list.d/3cxpbx.list \
     && echo "deb http://deb.debian.org/debian/ $DEBIAN_VERSION main"  | tee /etc/apt/sources.list \
     && echo "deb-src http://deb.debian.org/debian/ $DEBIAN_VERSION main"  | tee /etc/apt/sources.list
+    && apt-get update -y \
+    && apt-get install -y \
+        3cxpbx \
+        net-tools \
 
 # Actualizează din nou pachetele înainte de instalarea 3CX PBX
 # RUN apt-get update -y && apt-get upgrade -y \
 
-RUN apt-get install -y 3cxpbx*
+#RUN apt-get install -y 3cxpbx*
+   # && /usr/sbin/3CXWizard --cleanup
     
 # Instalează 3CX PBX
 # RUN apt-get install -qq -y --no-install-recommends 3cxpbx \  

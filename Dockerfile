@@ -40,8 +40,7 @@ RUN echo "deb [arch=amd64 by-hash=yes signed-by=/usr/share/keyrings/3cx-archive-
     && echo "deb-src http://deb.debian.org/debian/ $DEBIAN_VERSION main"  | tee -a /etc/apt/sources.list
 
 # Actualizează din nou pachetele înainte de instalarea 3CX PBX
-RUN apt-get update -y && apt-get upgrade -y && \
-    apt-get install -y 3cxpbx
+RUN apt-get update -y && apt-get upgrade -y && apt-get install -y 3cxpbx
 
 EXPOSE 5015/tcp
 EXPOSE 5001/tcp

@@ -100,7 +100,7 @@ jobs:
         if: github.event.inputs.release == 'true'
         uses: actions/create-release@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+          GITHUB_TOKEN: ${{ secrets.GHCR_TOKEN }} # This token is provided by Actions, you do not need to create your own token
         with:
           tag_name: ${{ env.package_version }}-${{ github.run_number }}
           release_name: Release v${{ env.package_version }}-${{ github.run_number }}
@@ -118,7 +118,7 @@ jobs:
         if: github.event.inputs.release == 'false'
         uses: actions/create-release@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+          GITHUB_TOKEN: ${{ secrets.GHCR_TOKEN }} # This token is provided by Actions, you do not need to create your own token
         with:
           tag_name: ${{ env.package_version }}-test-${{ github.run_number }}
           release_name: Pre-release v${{ env.package_version }}-test-${{ github.run_number }}

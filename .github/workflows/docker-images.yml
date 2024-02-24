@@ -93,7 +93,7 @@ jobs:
             ghcr.io/levinetit/3cx:latest
             ${{ secrets.DOCKER_USER }}/3cx:latest
             ${{ secrets.DOCKER_USER }}/3cx:${{ env.package_version }}
-            ${{ secrets.DOCKER_USERE }}/3cx:${{ env.package_version }}-${{ github.run_number }}
+            ${{ secrets.DOCKER_USER }}/3cx:${{ env.package_version }}-${{ github.run_number }}
 
       -
         name: Create Release

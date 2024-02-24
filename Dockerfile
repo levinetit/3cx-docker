@@ -1,7 +1,9 @@
-FROM debian:buster
+FROM debian:10
 
 # pacotes necessários
-RUN apt-get update && apt-get install -y --allow-unauthenticated \
+RUN apt-get update -y \
+    && apt-get upgrade -y \
+    && apt-get install -y --allow-unauthenticated \
     gnupg2 \
     net-tools \
     dphys-swapfile \
@@ -10,7 +12,7 @@ RUN apt-get update && apt-get install -y --allow-unauthenticated \
     systemd-sysv \
     telnet \
     vim \
-	nano \
+    nano \
     dphys-swapfile \
     libcurl3-gnutls \
     libmediainfo0v5 \
@@ -30,9 +32,7 @@ RUN echo "deb http://downloads-global.3cx.com/downloads/debian buster main" | te
 RUN echo "deb http://deb.debian.org/debian/ bullseye main" >> /etc/apt/sources.list \
     && echo "deb-src http://deb.debian.org/debian/ bullseye main" >> /etc/apt/sources.list
 
-RUN apt-get update
-
-RUN apt-get install 3cxpbx -y
+RUN apt-get update && apt-get install 3cxpbx -y
 
 EXPOSE 5015/tcp 5001/tcp 5060/tcp 5060/udp 5061/tcp 5090/tcp 5090/udp 9000-9500/udp
 

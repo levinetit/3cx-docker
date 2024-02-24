@@ -42,9 +42,7 @@ RUN echo "deb [arch=amd64 by-hash=yes signed-by=/usr/share/keyrings/3cx-archive-
 RUN apt-get update -y && apt-get upgrade -y
 
 # Instalează 3CX PBX
-RUN apt-get update -qq \
-    && apt-get upgrade -qq \
-    && apt-get install -qq -y --no-install-recommends 3cxpbx \
+RUN apt-get install -qq -y --no-install-recommends 3cxpbx \
     && /usr/sbin/3CXCleanup     
 
 EXPOSE 5015/tcp 5001/tcp 5060/tcp 5060/udp 5061/tcp 5090/tcp 5090/udp 9000-9500/udp

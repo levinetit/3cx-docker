@@ -31,10 +31,11 @@ RUN echo "deb http://downloads-global.3cx.com/downloads/debian buster main" | te
 
 RUN echo "deb http://deb.debian.org/debian/ bullseye main" >> /etc/apt/sources.list \
     && echo "deb-src http://deb.debian.org/debian/ bullseye main" >> /etc/apt/sources.list
-RUN && apt-get install -y --allow-unauthenticated \
-       net-tools \
-       dphys-swapfile \
-       $(apt-cache depends 3cxpbx | grep Depends | sed "s/.*ends:\ //" | tr '\n' ' ') \
+
+RUN apt-get install -y --allow-unauthenticated \
+    net-tools \
+    dphys-swapfile \
+    $(apt-cache depends 3cxpbx | grep Depends | sed "s/.*ends:\ //" | tr '\n' ' ') \
        
 EXPOSE 5015/tcp 5001/tcp 5060/tcp 5060/udp 5061/tcp 5090/tcp 5090/udp 9000-9500/udp
 

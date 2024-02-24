@@ -11,6 +11,7 @@ RUN apt-get update -y \
     && apt-get upgrade -y \
     && apt-get install -y --allow-unauthenticated \
     ca-certificates \
+    gettext-base \
     gnupg2 \
     net-tools \
     dphys-swapfile \
@@ -29,6 +30,8 @@ RUN apt-get update -y \
     libssh2-1 \
     libzen0v5 \
     apt-transport-https \
+    systemd \
+    systemd-sysv \
     && rm -rf /var/lib/apt/lists/*
 
 # Adaugă cheia publică pentru 3CX PBX

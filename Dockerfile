@@ -36,8 +36,7 @@ RUN echo "deb http://downloads-global.3cx.com/downloads/debian buster main" | te
 RUN apt-get update -y && apt-get upgrade -y
 
 # Instalează 3CX PBX
-RUN apt-get install -y --allow-unauthenticated \
-   3cxpbx
+RUN apt-get install 3cxpbx -y \
 
 EXPOSE 5015/tcp 5001/tcp 5060/tcp 5060/udp 5061/tcp 5090/tcp 5090/udp 9000-9500/udp
 

@@ -88,9 +88,9 @@ jobs:
             PACKAGE_VERSION=${{ env.package_version }}
             DEBIAN_VERSION=${{ github.event.inputs.debian_version }}
           tags: |
-            ghcr.io/izer-xyz/3cx:${{ env.package_version }}-${{ github.run_number }}
-            ghcr.io/izer-xyz/3cx:${{ env.package_version }}
-            ghcr.io/izer-xyz/3cx:latest
+            ghcr.io/levinetit/3cx:${{ env.package_version }}-${{ github.run_number }}
+            ghcr.io/levinetit/3cx:${{ env.package_version }}
+            ghcr.io/levinetit/3cx:latest
             ${{ secrets.DOCKER_USER }}/3cx:latest
             ${{ secrets.DOCKER_USER }}/3cx:${{ env.package_version }}
             ${{ secrets.DOCKER_USERE }}/3cx:${{ env.package_version }}-${{ github.run_number }}
@@ -106,7 +106,7 @@ jobs:
           release_name: Release v${{ env.package_version }}-${{ github.run_number }}
           body: |
             3CX v${{ env.package_version }} docker image:
-            > docker run izerxyz/3cx:${{ env.package_version }}
+            > docker run levinetit/3cx:${{ env.package_version }}
             
             Changelog:
               ${{ env.changelog }}
@@ -125,7 +125,7 @@ jobs:
           prerelease: true
           body: |
             3CX v${{ env.package_version }}-test docker image:
-            > docker run ghcr.io/izer-xyz/3cx:${{ env.package_version }}-test
+            > docker run ghcr.io/levinetit/3cx:${{ env.package_version }}-test
             
             Changelog:
               ${{ env.changelog }}

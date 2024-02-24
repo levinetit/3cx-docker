@@ -40,7 +40,7 @@ RUN echo "deb [arch=amd64 by-hash=yes signed-by=/usr/share/keyrings/3cx-archive-
     && apt-get update -y \
     && apt-get install -y \
         3cxpbx \
-        net-tools \
+        net-tools 
 
 # Actualizează din nou pachetele înainte de instalarea 3CX PBX
 # RUN apt-get update -y && apt-get upgrade -y \

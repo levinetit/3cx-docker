@@ -21,7 +21,8 @@ RUN apt-get update -y \
     libssh2-1 \
     libtinyxml2-6a \
     libzen0v5 \
-    apt-transport-https
+    apt-transport-https \
+    & rm -rf /var/lib/apt/lists/*
 
 # Adaugă cheia publică pentru 3CX PBX
 RUN wget -O- https://repo.3cx.com/key.pub | gpg --dearmor | sudo tee /usr/share/keyrings/3cx-archive-keyring.gpg > /dev/null
@@ -35,7 +36,7 @@ RUN echo "deb [arch=amd64 by-hash=yes signed-by=/usr/share/keyrings/3cx-archive-
 RUN apt-get update -y && apt-get upgrade -y
 
 # Instalează 3CX PBX
-RUN apt-get install -y 3cxpbx
+# RUN apt-get install -y 3cxpbx
 
 EXPOSE 5015/tcp 5001/tcp 5060/tcp 5060/udp 5061/tcp 5090/tcp 5090/udp 9000-9500/udp
 

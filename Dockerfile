@@ -22,10 +22,10 @@ RUN apt-get update -y \
     libtinyxml2-6a \
     libzen0v5 \
     apt-transport-https \
-    & rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/*
 
 # Adaugă cheia publică pentru 3CX PBX
-RUN wget -O- https://repo.3cx.com/key.pub | gpg --dearmor | sudo tee /usr/share/keyrings/3cx-archive-keyring.gpg > /dev/null
+RUN wget -O- https://repo.3cx.com/key.pub | gpg --dearmor | sudo tee /usr/share/keyrings/3cx-archive-keyring.gpg
 
 # Adaugă repozitoriile
 RUN echo "deb [arch=amd64 by-hash=yes signed-by=/usr/share/keyrings/3cx-archive-keyring.gpg] http://repo.3cx.com/3cx bookworm main" | tee /etc/apt/sources.list.d/3cxpbx.list \

@@ -2,9 +2,9 @@ name: Docker Image 3cx
 
 on:
   push:
-    branches: [ master ]
+    branches: [ main ]
   pull_request:
-    branches: [ master ]
+    branches: [ main ]
 
 jobs:
 

@@ -3,7 +3,7 @@ FROM debian:bookworm
 # Instalare pachete necesare
 RUN apt-get update && apt-get upgrade -y && apt-get install -y --allow-unauthenticated \
     gettext-base \
-	gnupg2 \
+    gnupg2 \
     gnupg1 \
     net-tools \
     dphys-swapfile \
@@ -24,7 +24,8 @@ RUN apt-get update && apt-get upgrade -y && apt-get install -y --allow-unauthent
     apt-transport-https \
     systemd \
     systemd-sysv \
-	&& rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/*
+    
 # Adăugare repository-uri 3CX PBX și Debian
 RUN wget -qO- https://repo.3cx.com/key.pub | gpg --dearmor > /usr/share/keyrings/3cx-archive-keyring.gpg
 

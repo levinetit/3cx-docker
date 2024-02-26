@@ -10,7 +10,7 @@ on:
         type: boolean
       debian_version:
        description: 'Debian version (Bookworm)'
-       default: 'bookworm'
+       default: 'buster'
        required: true
        type: string
   #push:

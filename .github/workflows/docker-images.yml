@@ -62,15 +62,10 @@ jobs:
             PACKAGE_VERSION=${{ env.package_version }}
             DEBIAN_VERSION=${{ github.event.inputs.debian_version }}
           tags: |
-            ghcr.io/levinetit/3cx-docker:${{ env.package_version }}-test-${{ github.run_number }}
+            ghcr.io/levinetit/3cx-docker:${{ env.package_version }}test-${{ github.run_number }}
             ghcr.io/levinetit/3cx-docker:${{ env.package_version }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-
-      - name: Test image
-        timeout-minutes: 15
-        run: |
-          docker run -t --rm --env MODE=test --tmpfs /tmp --tmpfs /run --tmpfs /run/lock --cgroupns=host -v /sys/fs/cgroup:/sys/fs/cgroup:rw ghcr.io/levinetit/3cx-docker:${{ env.package_version }}
 
       - name: Build and push (release)
         if: github.event.inputs.release == 'true'

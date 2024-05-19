@@ -94,12 +94,12 @@ jobs:
         env:
           GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }} # This token is provided by Actions, you do not need to create your own token
         with:
-          tag_name: ${{ env.package_version }}-test-${{ github.run_number }}
-          release_name: Pre-release v${{ env.package_version }}-test-${{ github.run_number }}
+          tag_name: ${{ env.package_version }}-${{ github.run_number }}
+          release_name: Pre-release v${{ env.package_version }}-${{ github.run_number }}
           prerelease: true
           body: |
-            3CX v${{ env.package_version }}-test docker image:
-            > docker run ghcr.io/levinetit/3cx-docker:${{ env.package_version }}-test
+            3CX v${{ env.package_version }} docker image:
+            > docker run ghcr.io/levinetit/3cx-docker:${{ env.package_version }}
             
             Changelog:
               ${{ env.changelog }}

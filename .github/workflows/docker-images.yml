@@ -66,8 +66,9 @@ jobs:
             DEBIAN_VERSION=${{ github.event.inputs.debian_version }}
           tags: |
             ghcr.io/levinetit/3cx-docker:${{ env.package_version }}-test-${{ github.run_number }}
-            ghcr.io/levinetit/3cx-docker:${{ env.package_version }}-test
+            ghcr.io/levinetit/3cx-docker:${{ env.package_version }}-test-${{ github.run_number }}
             ghcr.io/levinetit/3cx-docker:test
+
           cache-from: type=gha
           cache-to: type=gha,mode=max
       -

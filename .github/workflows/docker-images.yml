@@ -53,26 +53,6 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GHCR_TOKEN }}
 
-      - name: Build and push (test)
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          push: true
-          build-args: |
-            PACKAGE_VERSION=${{ env.package_version }}
-            DEBIAN_VERSION=${{ github.event.inputs.debian_version }}
-          tags: |
-            ghcr.io/levinetit/3cx-docker:${{ env.package_version }}-test${{ github.run_number }}
-            ghcr.io/levinetit/3cx-docker:${{ env.package_version }}-test
-            ghcr.io/levinetit/3cx-docker:test
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-      - name: Test image
-        timeout-minutes: 15
-        run: |
-          docker run -t --rm --env MODE=test --tmpfs /tmp --tmpfs /run --tmpfs /run/lock --cgroupns=host -v /sys/fs/cgroup:/sys/fs/cgroup:rw ghcr.io/levinetit/3cx-docker:test
-
       - name: Build and push (release)
         if: github.event.inputs.release == 'true'
         uses: docker/build-push-action@v5
@@ -102,24 +82,6 @@ jobs:
           body: |
             3CX v${{ env.package_version }} docker image:
             > docker run levinetit/3cx-docker:${{ env.package_version }}
-            
-            Changelog:
-              ${{ env.changelog }}
-              
-            https://www.3cx.com/blog/change-log/phone-system-change-log/
-
-      - name: Create TestRelease
-        if: github.event.inputs.release == 'false'
-        uses: actions/create-release@v1.1.4
-        env:
-          GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }} # This token is provided by Actions, you do not need to create your own token
-        with:
-          tag_name: ${{ env.package_version }}-test-${{ github.run_number }}
-          release_name: Pre-release v${{ env.package_version }}-test${{ github.run_number }}
-          prerelease: true
-          body: |
-            3CX v${{ env.package_version }}-test docker image:
-            > docker run ghcr.io/levinetit/3cx-docker:${{ env.package_version }}-test
             
             Changelog:
               ${{ env.changelog }}

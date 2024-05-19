@@ -88,21 +88,3 @@ jobs:
               ${{ env.changelog }}
               
             https://www.3cx.com/blog/change-log/phone-system-change-log/
-
-      - name: Create TestRelease
-        if: github.event.inputs.release == 'false'
-        uses: actions/create-release@v1.1.4
-        env:
-          GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }} 
-        with:
-          tag_name: ${{ env.package_version }}-${{ github.run_number }}
-          release_name: Pre-release v${{ env.package_version }}-${{ github.run_number }}
-          prerelease: true
-          body: |
-            3CX v${{ env.package_version }}-test docker image:
-            > docker run ghcr.io/levinetit/3cx-docker:${{ env.package_version }}
-            
-            Changelog:
-              ${{ env.changelog }}
-              
-            https://www.3cx.com/blog/change-log/phone-system-change-log/

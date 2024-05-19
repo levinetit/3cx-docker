@@ -83,7 +83,7 @@ jobs:
             3CX v${{ env.package_version }} docker image:
             > docker run levinetit/3cx-docker:${{ env.package_version }}
             
-            Changelog:
+            Changelog: 
               ${{ env.changelog }}
               
             https://www.3cx.com/blog/change-log/phone-system-change-log/

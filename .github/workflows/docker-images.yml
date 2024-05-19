@@ -1,7 +1,7 @@
 name: docker-images
 
 on:
-  workflow_dispatch:
+   push:
     inputs:
       release:
         description: 'Publish release (untick for test only)'

@@ -1,7 +1,7 @@
-name: docker-images
+name: docker images d
 
 on:
-  push:
+  workflow_dispatch:
     inputs:
       release:
         description: 'Publish release (untick for test only)'
@@ -9,10 +9,13 @@ on:
         required: true
         type: boolean
       debian_version:
-       description: 'Debian version (Bookworm)'
-       default: 'buster'
+       description: 'Debian version (buster vs buster-testing)'
+       default: 'bookworm'
        required: true
        type: string
+  #push:
+   # branches:
+    #  - 'main'
   
 jobs:
   docker:
@@ -28,32 +31,33 @@ jobs:
           if [[ ! $(curl "https://www.3cx.com/blog/change-log/phone-system-change-log/" --silent | htmlq "h2" -1) == *"${package_version}"* ]]; then export changelog=""; fi
           echo package_version=$package_version >> $GITHUB_ENV
           echo changelog=$changelog >> $GITHUB_ENV
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+      -
+        name: Checkout
+        uses: actions/checkout@v3
+      -
+        name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+      -
+        name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
         with:
           config: buildkitd.toml
-
-      - name: Login to DockerHub
-        uses: docker/login-action@v3
+      -
+        name: Login to DockerHub
+        uses: docker/login-action@v2
         with:
-          username: ${{ secrets.DOCKER_USER }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v3
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      -
+        name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ secrets.GHCR_TOKEN }}
-
-      - name: Build and push (test)
-        uses: docker/build-push-action@v5
+          password: ${{ secrets.CR_PAT }}
+      -
+        name: Build and push (test)
+        uses: docker/build-push-action@v3
         with:
           context: .
           push: true
@@ -61,19 +65,20 @@ jobs:
             PACKAGE_VERSION=${{ env.package_version }}
             DEBIAN_VERSION=${{ github.event.inputs.debian_version }}
           tags: |
-            ghcr.io/levinetit/3cx-docker:${{ env.package_version }}test-${{ github.run_number }}
-            ghcr.io/levinetit/3cx-docker:${{ env.package_version }}test-${{ github.run_number }}
-            ghcr.io/levinetit/3cx-docker:test
+            ghcr.io/izer-xyz/3cx:${{ env.package_version }}-test-${{ github.run_number }}
+            ghcr.io/izer-xyz/3cx:${{ env.package_version }}-test
+            ghcr.io/izer-xyz/3cx:test
           cache-from: type=gha
           cache-to: type=gha,mode=max
-
-      - name: Test image
-        timeout-minutes: 15
+      -
+        name: Test image
+        timeout-minutes: 1
         run: |
-          docker run -t --rm --env MODE=test --tmpfs /tmp --tmpfs /run --tmpfs /run/lock --cgroupns=host -v /sys/fs/cgroup:/sys/fs/cgroup:rw ghcr.io/levinetit/3cx-docker:test
-      - name: Build and push (release)
+          docker run -t --rm --env MODE=test --tmpfs /tmp --tmpfs /run --tmpfs /run/lock --cgroupns=host -v /sys/fs/cgroup:/sys/fs/cgroup:rw ghcr.io/izer-xyz/3cx:test
+      -
+        name: Build and push (release)
         if: github.event.inputs.release == 'true'
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v3
         with:
           context: .
           platforms: linux/amd64, linux/arm64 
@@ -83,42 +88,48 @@ jobs:
             PACKAGE_VERSION=${{ env.package_version }}
             DEBIAN_VERSION=${{ github.event.inputs.debian_version }}
           tags: |
-            ghcr.io/levinetit/3cx-docker:${{ env.package_version }}-${{ github.run_number }}
-            ghcr.io/levinetit/3cx-docker:${{ env.package_version }}
-            ghcr.io/levinetit/3cx-docker:latest
-            ${{ secrets.DOCKER_USER }}/3cx-docker:latest
-            ${{ secrets.DOCKER_USER }}/3cx-docker:${{ env.package_version }}
-            ${{ secrets.DOCKER_USER }}/3cx-docker:${{ env.package_version }}-${{ github.run_number }}
-      - name: Create Release
+            ghcr.io/izer-xyz/3cx:${{ env.package_version }}-${{ github.run_number }}
+            ghcr.io/izer-xyz/3cx:${{ env.package_version }}
+            ghcr.io/izer-xyz/3cx:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/3cx:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/3cx:${{ env.package_version }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/3cx:${{ env.package_version }}-${{ github.run_number }}
+
+      -
+        name: Create Release
         if: github.event.inputs.release == 'true'
-        uses: actions/create-release@v1.1.4
+        uses: actions/create-release@v1
         env:
-          GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }} 
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
         with:
           tag_name: ${{ env.package_version }}-${{ github.run_number }}
           release_name: Release v${{ env.package_version }}-${{ github.run_number }}
           body: |
             3CX v${{ env.package_version }} docker image:
-            > docker run levinetit/3cx-docker:${{ env.package_version }}
+            > docker run izerxyz/3cx:${{ env.package_version }}
             
             Changelog:
               ${{ env.changelog }}
               
             https://www.3cx.com/blog/change-log/phone-system-change-log/
-      - name: Create TestRelease
+
+      - 
+        name: Create TestRelease
         if: github.event.inputs.release == 'false'
-        uses: actions/create-release@v1.1.4
+        uses: actions/create-release@v1
         env:
-          GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }} 
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
         with:
           tag_name: ${{ env.package_version }}-test-${{ github.run_number }}
           release_name: Pre-release v${{ env.package_version }}-test-${{ github.run_number }}
           prerelease: true
           body: |
             3CX v${{ env.package_version }}-test docker image:
-            > docker run ghcr.io/levinetit/3cx-docker:${{ env.package_version }}-test
+            > docker run ghcr.io/izer-xyz/3cx:${{ env.package_version }}-test
             
             Changelog:
               ${{ env.changelog }}
               
             https://www.3cx.com/blog/change-log/phone-system-change-log/
+
+      

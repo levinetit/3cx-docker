@@ -35,6 +35,8 @@ RUN echo "deb http://deb.debian.org/debian/ bookworm main" tee -a /etc/apt/sourc
 
 RUN apt-get update && apt-get upgrade -y
 
+RUN apt-get install -y 3cxpbx
+
 VOLUME [ "/sys/fs/cgroup" ]
 
 EXPOSE 5015/tcp 5001/tcp 5060/tcp 5060/udp 5061/tcp 5090/tcp 5090/udp 9000-9500/udp

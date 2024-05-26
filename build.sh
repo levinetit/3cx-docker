@@ -1,6 +1,6 @@
 #!/bin/bash
   
-VERSION=18.0.9.20
+VERSION=20.0.1.731
 USER=levinetit
 
 docker rmi ${USER}/3cx:${VERSION}

@@ -1,4 +1,4 @@
-FROM debian:stretch
+FROM debian:bullseye
 
 # Argumentele pentru etichetele de construire
 ARG BUILD_STRING
@@ -29,7 +29,7 @@ RUN apt-get update -y && \
         
 # Descărcarea și adăugarea cheii publice pentru depozitul 3CX PBX
     wget -O- http://downloads.3cx.com/downloads/3cxpbx/public.key | apt-key add - && \
-    echo "deb http://downloads.3cx.com/downloads/debian stretch main" | tee /etc/apt/sources.list.d/3cxpbx.list && \
+    echo "deb http://downloads.3cx.com/downloads/debian bullseye main" | tee /etc/apt/sources.list.d/3cxpbx.list && \
     apt-get update -y && \
 
 # Instalarea 3CX PBX

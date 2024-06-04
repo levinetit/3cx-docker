@@ -1,4 +1,4 @@
-FROM debian:bullseye
+FROM debian:buster
 
 # Argumentele pentru etichetele de construire
 ARG BUILD_STRING

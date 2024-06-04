@@ -36,10 +36,6 @@ RUN apt-get update -y && \
     apt-get install -y --no-install-recommends \
         3cxpbx && \
 
-# Curățarea cache-ului și a fișierelor temporare
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
-
 # Expunerea porturilor
 EXPOSE 5015/tcp 5001/tcp 5060/tcp 5060/udp 5061/tcp 5090/tcp 5090/udp 9000-9500/udp
 

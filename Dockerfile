@@ -27,10 +27,6 @@ RUN apt-get update -y && \
         locales \
         net-tools && \
         
-# Configurarea localizării
-    sed -i 's/# \(en_US.UTF-8\)/\1/' /etc/locale.gen && \
-    locale-gen && \
-
 # Descărcarea și adăugarea cheii publice pentru depozitul 3CX PBX
     wget -O- http://downloads.3cx.com/downloads/3cxpbx/public.key | apt-key add - && \
     echo "deb http://downloads.3cx.com/downloads/debian stretch main" | tee /etc/apt/sources.list.d/3cxpbx.list && \

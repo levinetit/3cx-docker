@@ -10,7 +10,7 @@ on:
         type: boolean
       debian_version:
         description: 'Debian version (buster vs buster-testing)'
-        default: 'bookworm'
+        default: 'stretch'
         required: true
         type: string
 

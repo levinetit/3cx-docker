@@ -49,7 +49,8 @@ RUN apt-get update -y \
  && rm -f /lib/systemd/system/sockets.target.wants/*initctl* \
  && rm -f /lib/systemd/system/basic.target.wants/* \
  && rm -f /lib/systemd/system/anaconda.target.wants/*
-RUN apt-get install -y 3cxbpx
+RUN apt-get install -y  --allow-unauthenticated \ 
+  3cxbpx \
 # Expunerea porturilor
 EXPOSE 5015/tcp 5001/tcp 5060/tcp 5060/udp 5061/tcp 5090/tcp 5090/udp 9000-9500/udp
 

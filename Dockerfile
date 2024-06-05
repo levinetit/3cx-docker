@@ -23,8 +23,13 @@ RUN apt-get update -y \
     apt-utils \
     wget \
     gnupg2 \
+    gnupg1 \
     systemd \
     locales \
+    apt-transport-https \
+    systemd \
+    systemd-sysv \
+	   apt-utils \
  && sed -i 's/# \(en_US.UTF-8\)/\1/' /etc/locale.gen \
  && locale-gen \
  && wget -O- http://downloads.3cx.com/downloads/3cxpbx/public.key | apt-key add - \

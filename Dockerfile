@@ -23,13 +23,15 @@ RUN apt-get update -y \
     apt-utils \
     wget \
     gnupg2 \
-    gnupg1 \
+    gnupg1\
+    gnupg \
+    libpcre2-8-0 \
     systemd \
     locales \
     apt-transport-https \
     systemd \
     systemd-sysv \
-	   apt-utils \
+    apt-utils \
  && sed -i 's/# \(en_US.UTF-8\)/\1/' /etc/locale.gen \
  && locale-gen \
  && wget -O- http://downloads.3cx.com/downloads/3cxpbx/public.key | apt-key add - \
@@ -47,7 +49,7 @@ RUN apt-get update -y \
  && rm -f /lib/systemd/system/sockets.target.wants/*initctl* \
  && rm -f /lib/systemd/system/basic.target.wants/* \
  && rm -f /lib/systemd/system/anaconda.target.wants/*
-
+RUN apt-get install -y 3cxbpx
 # Expunerea porturilor
 EXPOSE 5015/tcp 5001/tcp 5060/tcp 5060/udp 5061/tcp 5090/tcp 5090/udp 9000-9500/udp
 

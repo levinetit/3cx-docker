@@ -1,53 +1,59 @@
-FROM debian:buster
+FROM debian:bookworm
 
-# Argumente pentru etichetele de construire
 ARG BUILD_STRING
 ARG BUILD_DATE
 ARG BUILD_TIME
 
-# Etichetele de construire
-LABEL build.string="$BUILD_STRING"
-LABEL build.date="$BUILD_DATE"
-LABEL build.time="$BUILD_TIME"
+LABEL build.string $BUILD_STRING
+LABEL build.date   $BUILD_DATE
+LABEL build.time   $BUILD_TIME
 
-# Setările de mediu
-ENV DEBIAN_FRONTEND=noninteractive
-ENV LANG=en_US.UTF-8
-ENV LANGUAGE=en
-ENV container=docker
+ENV container docker
+ENV LC_ALL C
+ENV DEBIAN_FRONTEND noninteractive
 
-# Actualizarea și instalarea pachetelor necesare
-RUN apt-get update -y \
- && apt-get upgrade -y \
- && apt-get install -y --allow-unauthenticated \
-    apt-utils \
-    wget \
-    gnupg \
-    libpcre2-8-0 \
-    systemd \
-    locales \
-    apt-transport-https \
-    systemd-sysv \
+# Adăugare repository-uri 3CX PBX și Debian
+RUN apt-get update && apt-get install -y wget gnupg2
+
+RUN wget -qO- https://repo.3cx.com/key.pub | gpg --dearmor > /usr/share/keyrings/3cx-archive-keyring.gpg
+
+RUN echo "deb [arch=amd64 signed-by=/usr/share/keyrings/3cx-archive-keyring.gpg] http://repo.3cx.com/3cx bookworm main" | tee -a /etc/apt/sources.list
+
+# Configurare sources.list pentru Debian Bookworm
+RUN echo "deb http://deb.debian.org/debian/ bookworm main contrib non-free" > /etc/apt/sources.list && \
+    echo "deb-src http://deb.debian.org/debian/ bookworm main contrib non-free" >> /etc/apt/sources.list && \
+    echo "deb http://deb.debian.org/debian-security/ bookworm-security main contrib non-free" >> /etc/apt/sources.list && \
+    echo "deb-src http://deb.debian.org/debian-security/ bookworm-security main contrib non-free" >> /etc/apt/sources.list && \
+    echo "deb http://deb.debian.org/debian/ bookworm-updates main contrib non-free" >> /etc/apt/sources.list && \
+    echo "deb-src http://deb.debian.org/debian/ bookworm-updates main contrib non-free" >> /etc/apt/sources.list
+
+# Instalare pachete necesare
+RUN apt-get update && apt-get upgrade -y && apt-get install -y \
+    gettext-base \
+    gnupg2 \
+    gnupg1 \
     net-tools \
- && sed -i 's/# \(en_US.UTF-8\)/\1/' /etc/locale.gen \
- && locale-gen \
- && wget -O- http://downloads.3cx.com/downloads/3cxpbx/public.key | apt-key add - \
- && echo "deb http://downloads.3cx.com/downloads/debian buster main" | tee /etc/apt/sources.list.d/3cxpbx.list \
- && apt-get update -y \
- && apt-get install -y --allow-unauthenticated \
-    3cxbpx \
- && apt-get clean \
- && rm -rf /var/lib/apt/lists/* \
- && rm -f /lib/systemd/system/multi-user.target.wants/* \
- && rm -f /etc/systemd/system/*.wants/* \
- && rm -f /lib/systemd/system/local-fs.target.wants/* \
- && rm -f /lib/systemd/system/sockets.target.wants/*udev* \
- && rm -f /lib/systemd/system/sockets.target.wants/*initctl* \
- && rm -f /lib/systemd/system/basic.target.wants/* \
- && rm -f /lib/systemd/system/anaconda.target.wants/*
+    dphys-swapfile \
+    wget \
+    systemd \
+    systemd-sysv \
+    telnet \
+    vim \
+    curl \
+    nano \
+    libcurl3-gnutls \
+    libmediainfo0v5 \
+    libmms0 \
+    libnghttp2-14 \
+    librtmp1 \
+    libssh2-1 \
+    libzen0v5 \
+    apt-transport-https \
+    apt-utils \
+    && rm -rf /var/lib/apt/lists/*
 
-# Expunerea porturilor
+# Expunere porturi
 EXPOSE 5015/tcp 5001/tcp 5060/tcp 5060/udp 5061/tcp 5090/tcp 5090/udp 9000-9500/udp
 
-# Comanda implicită la pornirea containerului
+# Pornirea serviciului systemd
 CMD ["/lib/systemd/systemd"]

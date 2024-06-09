@@ -21,7 +21,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y curl gunzip pip3
+          sudo apt-get install -y curl gzip python3-pip
           pip3 install htmlq
         shell: bash
 

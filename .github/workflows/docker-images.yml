@@ -18,9 +18,15 @@ jobs:
   docker:
     runs-on: ubuntu-latest
     steps:
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y curl gunzip pip3
+          pip3 install htmlq
+        shell: bash
+
       - name: Get package version
         run: |
-          pip3 install htmlq
           changelog=$(curl "https://www.3cx.com/blog/change-log/phone-system-change-log/" --silent | htmlq "h2 + ul" -1)
           url=http://repo.3cx.com/3cx/dists/${{ github.event.inputs.debian_version }}/main/binary-amd64/Packages.gz
           package=3cxpbx
@@ -28,6 +34,7 @@ jobs:
           if [[ ! $(curl "https://www.3cx.com/blog/change-log/phone-system-change-log/" --silent | htmlq "h2" -1) == *"${package_version}"* ]]; then changelog=""; fi
           echo package_version=$package_version >> $GITHUB_ENV
           echo changelog=$changelog >> $GITHUB_ENV
+        shell: bash
 
       - name: Checkout
         uses: actions/checkout@v4
@@ -75,7 +82,7 @@ jobs:
         if: github.event.inputs.release == 'true'
         uses: actions/create-release@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.GHCR_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
         with:
           tag_name: ${{ env.package_version }}-${{ github.run_number }}
           release_name: Release v${{ env.package_version }}-${{ github.run_number }}

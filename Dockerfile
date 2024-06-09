@@ -44,7 +44,7 @@ RUN apt-get update && apt-get upgrade -y
 
 # Instalare 3cxpbx
 #RUN apt-get install -y 3cxpbx
-RUN apt-cache policy 3cxpbx | grep -o '20.*' | grep -o '^\S*'
+#RUN apt-cache policy 3cxpbx | grep -o '20.*' | grep -o '^\S*'
 # Expunere porturi
 EXPOSE 5015/tcp 5001/tcp 5060/tcp 5060/udp 5061/tcp 5090/tcp 5090/udp 9000-9500/udp
 

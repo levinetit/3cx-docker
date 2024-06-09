@@ -40,10 +40,10 @@ RUN echo "deb [signed-by=/usr/share/keyrings/3cx-archive-keyring.gpg] http://rep
 RUN echo "deb http://deb.debian.org/debian/ bookworm main contrib non-free" >> /etc/apt/sources.list
 RUN echo "deb http://deb.debian.org/debian-security/ bookworm-security main contrib non-free" >> /etc/apt/sources.list
 
-RUN apt-get update
+RUN apt-get update && apt-get upgrade -y
 
 # Instalare 3cxpbx
-RUN apt-get install -y 3cxpbx
+#RUN apt-get install -y 3cxpbx
 
 # Expunere porturi
 EXPOSE 5015/tcp 5001/tcp 5060/tcp 5060/udp 5061/tcp 5090/tcp 5090/udp 9000-9500/udp

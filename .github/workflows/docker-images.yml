@@ -110,17 +110,15 @@ jobs:
 
       - name: Create Release
         if: github.event.inputs.release == 'true'
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ env.package_version }}-${{ env.BUILD_NUMBER }}
-          release_name: Release v${{ env.package_version }}-${{ env.BUILD_NUMBER }}
+          name: Release v${{ env.package_version }}-${{ env.BUILD_NUMBER }}
           body: |
             3CX v${{ env.package_version }} docker image:
             > docker run levinetit/3cx:${{ env.package_version }}
-            
+
             Changelog:
               ${{ env.changelog }}
-              
+
             https://www.3cx.com/blog/change-log/phone-system-change-log/

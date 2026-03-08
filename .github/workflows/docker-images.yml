@@ -97,8 +97,7 @@ jobs:
             ghcr.io/levinetit/3cx:${{ env.BUILD_NUMBER }}
             ghcr.io/levinetit/3cx:latest
             ${{ secrets.DOCKER_USER }}/3cx:latest
-            ${{ secrets.DOCKER_USER }}/3cx:${{ env.package_version }}
-            ${{ secrets.DOCKER_USER }}/3cx:${{ env.package_version }}-${{ github.run_number }}
+            ${{ secrets.DOCKER_USER }}/3cx:v${{ env.major_version }}.${{ env.BUILD_NUMBER }}
 
       - name: Increment build number
         if: github.event.inputs.release == 'true'
@@ -118,7 +117,7 @@ jobs:
           name: Release v${{ env.major_version }}.${{ env.BUILD_NUMBER }}
           body: |
             3CX docker image:
-            > docker run levinetit/3cx:latest
+            > docker run levinetit/3cx:v${{ env.major_version }}.${{ env.BUILD_NUMBER }}
 
             Changelog:
               ${{ env.changelog }}

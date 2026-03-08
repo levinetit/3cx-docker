@@ -139,15 +139,15 @@ jobs:
 
       - name: Create Release
         if: github.event.inputs.release == 'true'
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ env.IMAGE_TAG }}
-          name: Release ${{ env.IMAGE_TAG }}
-          body: |
-            3CX docker image:
-            > docker run levinetit/3cx:${{ env.IMAGE_TAG }}
+        env:
+          GH_TOKEN: ${{ secrets.GHCR_TOKEN }}
+        run: |
+          NOTES="3CX docker image:
+          > docker run levinetit/3cx:${{ env.IMAGE_TAG }}
 
-            Changelog:
-              ${{ env.changelog }}
+          https://www.3cx.com/blog/change-log/phone-system-change-log/"
 
-            https://www.3cx.com/blog/change-log/phone-system-change-log/
+          gh release create "${{ env.IMAGE_TAG }}" \
+            --repo "${{ github.repository }}" \
+            --title "Release ${{ env.IMAGE_TAG }}" \
+            --notes "$NOTES" || echo "Release already exists, skipping."

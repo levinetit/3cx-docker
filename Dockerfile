@@ -31,17 +31,7 @@ RUN curl -fsSL https://repo.3cx.com/key.pub | tr -d '\r' \
         http://repo.3cx.com/3cx ${DEBIAN_VERSION} main" \
         | tee /etc/apt/sources.list.d/3cxpbx.list
 
-# Instalare 3cxpbx cu mock systemctl (systemd nu ruleaza in build)
-RUN apt-get update && apt-get upgrade -y \
-    && printf '#!/bin/sh\nexit 0\n' > /usr/sbin/policy-rc.d && chmod +x /usr/sbin/policy-rc.d \
-    && printf '#!/bin/sh\nexit 0\n' > /usr/local/sbin/systemctl && chmod +x /usr/local/sbin/systemctl \
-    && ( if [ -n "$PACKAGE_VERSION" ]; then \
-            echo 1 | apt-get install -y 3cxpbx=${PACKAGE_VERSION}; \
-         else \
-            echo 1 | apt-get install -y 3cxpbx; \
-         fi ) \
-    && rm -f /usr/sbin/policy-rc.d /usr/local/sbin/systemctl \
-    && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/*
 
 # Copiere scripturi custom
 COPY assets/3cx_fix_perms.sh /3cx_fix_perms.sh
@@ -49,26 +39,20 @@ COPY assets/3cx_fix_perms.service /etc/systemd/system/3cx_fix_perms.service
 COPY assets/3cx_autosetup.sh /3cx_autosetup.sh
 COPY assets/3cx_autosetup.service /etc/systemd/system/3cx_autosetup.service
 
-# Permisiuni + activare servicii via symlink (fara systemctl activ)
 RUN chmod +x /3cx_fix_perms.sh /3cx_autosetup.sh \
     && mkdir -p /etc/systemd/system/multi-user.target.wants \
-    # Mascare servicii incompatibile cu containerul Docker
-    && ln -sf /dev/null /etc/systemd/system/dphys-swapfile.service \
-    && ln -sf /dev/null /etc/systemd/system/systemd-logind.service \
-    && ln -sf /dev/null /etc/systemd/system/console-getty.service \
-    && ln -sf /dev/null /etc/systemd/system/getty.target \
-    # Activare servicii necesare
-    && ln -sf /lib/systemd/system/nginx.service \
-              /etc/systemd/system/multi-user.target.wants/nginx.service \
-    && ln -sf /lib/systemd/system/postgresql.service \
-              /etc/systemd/system/multi-user.target.wants/postgresql.service \
     && ln -sf /etc/systemd/system/3cx_fix_perms.service \
               /etc/systemd/system/multi-user.target.wants/3cx_fix_perms.service \
     && ln -sf /etc/systemd/system/3cx_autosetup.service \
-              /etc/systemd/system/multi-user.target.wants/3cx_autosetup.service \
-    && (ln -sf /lib/systemd/system/exim4.service \
-               /etc/systemd/system/multi-user.target.wants/exim4.service 2>/dev/null || true)
+              /etc/systemd/system/multi-user.target.wants/3cx_autosetup.service
 
+# Mascare servicii incompatibile cu containerul Docker
+RUN ln -sf /dev/null /etc/systemd/system/dphys-swapfile.service \
+    && ln -sf /dev/null /etc/systemd/system/systemd-logind.service \
+    && ln -sf /dev/null /etc/systemd/system/console-getty.service \
+    && ln -sf /dev/null /etc/systemd/system/getty.target
+
+# NOTA: 3cxpbx se instaleaza in GitHub Actions workflow (necesita systemd activ)
 EXPOSE 5015/tcp 5001/tcp 5060/tcp 5060/udp 5061/tcp 5090/tcp 5090/udp 9000-9500/udp
 
 CMD ["/lib/systemd/systemd"]

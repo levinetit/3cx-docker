@@ -9,6 +9,9 @@ log() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] [3cx-autosetup] $*" | tee -a "$LOG"
 
 log "=== Inceput setup automat 3CX ==="
 
+# 0. Mascheaza servicii incompatibile cu containerul
+systemctl mask dphys-swapfile.service 2>/dev/null || true
+
 # 1. Asigura directorul de log nginx
 if [ ! -d /var/log/nginx ]; then
     log "Creare /var/log/nginx..."
@@ -79,5 +82,14 @@ for DB in masterprofiles database_single; do
         su -s /bin/bash -c "psql -p 5480 -c \"CREATE DATABASE $DB OWNER phonesystem;\"" postgres
     fi
 done
+
+# 10. Enable si porneste 3CXCfgServ01 daca este instalat
+if [ -f /lib/systemd/system/3CXCfgServ01.service ]; then
+    systemctl enable 3CXCfgServ01.service 2>/dev/null || true
+    if ! systemctl is-active --quiet 3CXCfgServ01.service; then
+        log "Pornire 3CXCfgServ01.service..."
+        systemctl start 3CXCfgServ01.service || true
+    fi
+fi
 
 log "=== Setup automat 3CX finalizat cu succes ==="

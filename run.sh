@@ -1,6 +1,7 @@
 #!/bin/bash
 
-VERSION=18.0.9.31
+
+VERSION=20.0.8.1109
 USER=levinetit
 HOSTNAME=levinetit.3cx.ro
 

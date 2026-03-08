@@ -4,9 +4,9 @@ ARG BUILD_STRING
 ARG BUILD_DATE
 ARG BUILD_TIME
 
-LABEL build.string $BUILD_STRING
-LABEL build.date $BUILD_DATE
-LABEL build.time $BUILD_TIME
+LABEL build.string=$BUILD_STRING
+LABEL build.date=$BUILD_DATE
+LABEL build.time=$BUILD_TIME
 
 ENV container=docker
 ENV LC_ALL=C

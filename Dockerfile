@@ -15,22 +15,19 @@ ENV LANGUAGE=en
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Instalare pachete necesare pentru configurare și instalare
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     wget \
     gnupg \
     systemd \
     systemd-sysv \
-    apt-transport-https \
     curl \
     jq \
     net-tools \
     gpg \
     dphys-swapfile \
-    vim \
-    nano \
-    telnet \
     gettext-base \
-    debconf-utils
+    debconf-utils \
+    && rm -rf /var/lib/apt/lists/*
 
 # Descărcare și instalare cheie publică 3CX PBX
 RUN wget -qO- https://repo.3cx.com/key.pub | gpg --dearmor > /usr/share/keyrings/3cx-archive-keyring.gpg
@@ -40,7 +37,7 @@ RUN echo "deb [signed-by=/usr/share/keyrings/3cx-archive-keyring.gpg] http://rep
 RUN echo "deb http://deb.debian.org/debian/ bookworm main contrib non-free" >> /etc/apt/sources.list
 RUN echo "deb http://deb.debian.org/debian-security/ bookworm-security main contrib non-free" >> /etc/apt/sources.list
 
-RUN apt-get update && apt-get upgrade -y
+RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/*
 
 # Instalare 3cxpbx
 #RUN apt-get install -y 3cxpbx

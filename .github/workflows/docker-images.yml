@@ -20,7 +20,11 @@ jobs:
     permissions:
       contents: write
       packages: write
+      actions: write
     steps:
+      - name: Set build number
+        run: echo "BUILD_NUMBER=${{ vars.BUILD_NUMBER }}" >> $GITHUB_ENV
+
       - name: Install dependencies
         run: |
           sudo apt-get update
@@ -88,11 +92,21 @@ jobs:
             PACKAGE_VERSION=${{ env.package_version }}
             DEBIAN_VERSION=${{ github.event.inputs.debian_version }}
           tags: |
-            ghcr.io/levinetit/3cx:${{ github.run_number }}
+            ghcr.io/levinetit/3cx:${{ env.BUILD_NUMBER }}
             ghcr.io/levinetit/3cx:latest
             ${{ secrets.DOCKER_USER }}/3cx:latest
             ${{ secrets.DOCKER_USER }}/3cx:${{ env.package_version }}
             ${{ secrets.DOCKER_USER }}/3cx:${{ env.package_version }}-${{ github.run_number }}
+
+      - name: Increment build number
+        if: github.event.inputs.release == 'true'
+        run: |
+          next=$(( ${{ vars.BUILD_NUMBER }} + 1 ))
+          curl -s -X PATCH \
+            -H "Authorization: token ${{ secrets.GHCR_TOKEN }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            "https://api.github.com/repos/${{ github.repository }}/actions/variables/BUILD_NUMBER" \
+            -d "{\"name\":\"BUILD_NUMBER\",\"value\":\"$next\"}"
 
       - name: Create Release
         if: github.event.inputs.release == 'true'
@@ -100,8 +114,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ env.package_version }}-${{ github.run_number }}
-          release_name: Release v${{ env.package_version }}-${{ github.run_number }}
+          tag_name: ${{ env.package_version }}-${{ env.BUILD_NUMBER }}
+          release_name: Release v${{ env.package_version }}-${{ env.BUILD_NUMBER }}
           body: |
             3CX v${{ env.package_version }} docker image:
             > docker run levinetit/3cx:${{ env.package_version }}

@@ -1,10 +1,12 @@
 #!/bin/bash
 
+set -e
 
 VERSION=20.0.8.1109
 USER=levinetit
 
-docker rmi ${USER}/3cx:${VERSION}
+# Sterge imaginea existenta (daca exista)
+docker rmi ${USER}/3cx:${VERSION} 2>/dev/null || true
 
 docker build \
         --force-rm \
@@ -14,9 +16,13 @@ docker build \
         --build-arg BUILD_TIME="$(date +%H:%M:%S)" \
         -t 3cx_stage1 .
 
+# Curata container stage1 existent daca ramane din build anterior
+docker rm -f 3cx_stage1_c 2>/dev/null || true
+
 docker run \
         -d \
         --privileged \
+        --cgroupns=host \
         --name 3cx_stage1_c 3cx_stage1
 
 # Asteapta systemd sa fie complet initializat
@@ -27,10 +33,11 @@ done
 echo "systemd ready."
 
 docker exec 3cx_stage1_c bash -c \
-        "   systemctl mask systemd-logind console-getty.service container-getty@.service getty-static.service getty@.service serial-getty@.service getty.target \
+        "   systemctl mask systemd-logind console-getty.service container-getty@.service \
+                getty-static.service getty@.service serial-getty@.service getty.target \
          && apt-get update \
          && echo 1 | apt-get -y install 3cxpbx \
-         && systemctl enable nginx postgresql \
+         && systemctl enable nginx postgresql 3cx_fix_perms.service 3cx_autosetup.service \
          && (systemctl enable exim4 2>/dev/null || true)"
 
 docker stop 3cx_stage1_c
@@ -40,5 +47,6 @@ docker commit 3cx_stage1_c ${USER}/3cx:${VERSION}
 docker push ${USER}/3cx:${VERSION} || echo "Push failed (no credentials) - image available locally"
 
 docker rm 3cx_stage1_c
-
 docker rmi 3cx_stage1
+
+echo "Build complet: ${USER}/3cx:${VERSION}"

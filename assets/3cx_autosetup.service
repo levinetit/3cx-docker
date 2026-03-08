@@ -1,0 +1,16 @@
+[Unit]
+Description=3CX Auto Setup (PostgreSQL clusters, users, databases)
+After=3cx_fix_perms.service postgresql@15-main.service
+Wants=postgresql@15-main.service
+Before=3CXCfgServ01.service nginx.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/3cx_autosetup.sh
+TimeoutStartSec=120
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

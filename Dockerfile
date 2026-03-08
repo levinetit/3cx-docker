@@ -38,6 +38,19 @@ RUN echo "deb [arch=amd64 signed-by=/usr/share/keyrings/3cx-archive-keyring.gpg]
 
 RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/*
 
+# Copiere scripturi de setup automat
+COPY assets/3cx_fix_perms.sh /3cx_fix_perms.sh
+COPY assets/3cx_fix_perms.service /etc/systemd/system/3cx_fix_perms.service
+COPY assets/3cx_autosetup.sh /3cx_autosetup.sh
+COPY assets/3cx_autosetup.service /etc/systemd/system/3cx_autosetup.service
+
+RUN chmod +x /3cx_fix_perms.sh /3cx_autosetup.sh \
+    && mkdir -p /etc/systemd/system/multi-user.target.wants \
+    && ln -sf /etc/systemd/system/3cx_fix_perms.service \
+              /etc/systemd/system/multi-user.target.wants/3cx_fix_perms.service \
+    && ln -sf /etc/systemd/system/3cx_autosetup.service \
+              /etc/systemd/system/multi-user.target.wants/3cx_autosetup.service
+
 # Instalare 3cxpbx
 #RUN apt-get install -y 3cxpbx
 #RUN apt-cache policy 3cxpbx | grep -o '20.*' | grep -o '^\S*'

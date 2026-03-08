@@ -114,7 +114,7 @@ jobs:
         if: github.event.inputs.release == 'true'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ env.package_version }}-${{ env.BUILD_NUMBER }}
+          tag_name: v${{ env.major_version }}.${{ env.BUILD_NUMBER }}
           name: Release v${{ env.major_version }}.${{ env.BUILD_NUMBER }}
           body: |
             3CX v${{ env.package_version }} docker image:

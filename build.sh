@@ -19,6 +19,13 @@ docker run \
         --privileged \
         --name 3cx_stage1_c 3cx_stage1
 
+# Asteapta systemd sa fie complet initializat
+echo "Waiting for systemd to be ready..."
+until docker exec 3cx_stage1_c systemctl is-system-running 2>/dev/null | grep -qE "running|degraded"; do
+    sleep 3
+done
+echo "systemd ready."
+
 docker exec 3cx_stage1_c bash -c \
         "   systemctl mask systemd-logind console-getty.service container-getty@.service getty-static.service getty@.service serial-getty@.service getty.target \
          && apt-get update \
@@ -30,7 +37,7 @@ docker stop 3cx_stage1_c
 
 docker commit 3cx_stage1_c ${USER}/3cx:${VERSION}
 
-docker push ${USER}/3cx:${VERSION}
+docker push ${USER}/3cx:${VERSION} || echo "Push failed (no credentials) - image available locally"
 
 docker rm 3cx_stage1_c
 

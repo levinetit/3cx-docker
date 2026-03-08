@@ -7,15 +7,15 @@ HOSTNAME=levinetit.3cx.ro
 
 docker run \
         -d \
-		--privileged \
+        --privileged \
+        --cgroupns=host \
         --name 3cx \
         --hostname ${HOSTNAME} \
-		--security-opt apparmor=unconfined \
-		--network host \
         --restart unless-stopped \
-        -v 3cx_backup:/srv/backup \
-        -v 3cx_recordings:/srv/recordings \
-        -v 3cx_log:/var/log \
-        --cap-add SYS_ADMIN \
-        --cap-add NET_ADMIN \
+        -v /home/docker-apps/3cx/3cx_backup:/srv/backup \
+        -v /home/docker-apps/3cx/3cx_recordings:/srv/recordings \
+        -v /home/docker-apps/3cx/3cx_log:/var/log \
+        -v /sys/fs/cgroup:/sys/fs/cgroup:rw \
+        -p 5015:5015 \
+        -p 5001:5001 \
         ${USER}/3cx:${VERSION}

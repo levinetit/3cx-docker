@@ -117,8 +117,8 @@ jobs:
           tag_name: v${{ env.major_version }}.${{ env.BUILD_NUMBER }}
           name: Release v${{ env.major_version }}.${{ env.BUILD_NUMBER }}
           body: |
-            3CX v${{ env.package_version }} docker image:
-            > docker run levinetit/3cx:${{ env.package_version }}
+            3CX docker image:
+            > docker run levinetit/3cx:latest
 
             Changelog:
               ${{ env.changelog }}

@@ -21,6 +21,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     systemd \
     systemd-sysv \
     curl \
+    ca-certificates \
     jq \
     net-tools \
     gpg \
@@ -29,13 +30,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     debconf-utils \
     && rm -rf /var/lib/apt/lists/*
 
-# Descărcare și instalare cheie publică 3CX PBX
-RUN wget -qO- https://repo.3cx.com/key.pub | gpg --dearmor > /usr/share/keyrings/3cx-archive-keyring.gpg
+# Descărcare și instalare cheie publică 3CX PBX (download separat pentru a evita probleme cu \r\n în pipe)
+RUN curl -fsSL https://repo.3cx.com/key.pub | tr -d '\r' | gpg --dearmor -o /usr/share/keyrings/3cx-archive-keyring.gpg
 
-# Adăugare repository 3CX PBX și actualizare listă de pachete
-RUN echo "deb [signed-by=/usr/share/keyrings/3cx-archive-keyring.gpg] http://repo.3cx.com/3cx bookworm main" | tee /etc/apt/sources.list.d/3cxpbx.list
-RUN echo "deb http://deb.debian.org/debian/ bookworm main contrib non-free" >> /etc/apt/sources.list
-RUN echo "deb http://deb.debian.org/debian-security/ bookworm-security main contrib non-free" >> /etc/apt/sources.list
+# Adăugare repository 3CX PBX (Debian 12 foloseste deja /etc/apt/sources.list.d/debian.sources)
+RUN echo "deb [arch=amd64 signed-by=/usr/share/keyrings/3cx-archive-keyring.gpg] http://repo.3cx.com/3cx bookworm main" | tee /etc/apt/sources.list.d/3cxpbx.list
 
 RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/*
 

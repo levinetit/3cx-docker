@@ -23,6 +23,10 @@ if [ ! -e "$DBPATH" ] && id postgres &>/dev/null; then
     su -s /bin/bash -c "/usr/lib/postgresql/$DBVER/bin/initdb $DBPATH" postgres 2>/dev/null || true
 fi
 
+# Asigura directoarele de log necesare (volumul /var/log e montat extern)
+mkdir -p /var/log/postgresql /var/log/nginx /var/log/3cx 2>/dev/null || true
+chown -R postgres:postgres /var/log/postgresql 2>/dev/null || true
+
 # Postgres wants to access this private SSL key
 chown root:postgres /etc/ssl/private 2>/dev/null || true
 chown postgres:postgres /etc/ssl/private/ssl-cert-snakeoil.key 2>/dev/null || true

@@ -16,7 +16,7 @@ chown -R root:postgres /etc/postgresql-common
 # Recreate fresh postgres db, if does not exist yet and fix perms
 chown -R postgres:postgres /var/lib/postgresql
 
-DBVER=11
+DBVER=15
 DBPATH=/var/lib/postgresql/$DBVER/main
 if [ ! -e "$DBPATH" ]; then
     mkdir -p $DBPATH

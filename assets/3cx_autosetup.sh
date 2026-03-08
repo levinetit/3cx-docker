@@ -83,12 +83,20 @@ for DB in masterprofiles database_single; do
     fi
 done
 
-# 10. Enable si porneste 3CXCfgServ01 daca este instalat
+# 10. Enable si porneste 3CXCfgServ01 daca este instalat (--no-block pentru a nu bloca)
 if [ -f /lib/systemd/system/3CXCfgServ01.service ]; then
     systemctl enable 3CXCfgServ01.service 2>/dev/null || true
     if ! systemctl is-active --quiet 3CXCfgServ01.service; then
-        log "Pornire 3CXCfgServ01.service..."
-        systemctl start 3CXCfgServ01.service || true
+        log "Pornire 3CXCfgServ01.service (no-block)..."
+        systemctl start --no-block 3CXCfgServ01.service || true
+    fi
+fi
+
+# 11. Lanseaza WebConfigTool (wizard 3CX pe portul 5015) daca nu ruleaza deja
+if [ -x /usr/sbin/3CXLaunchWebConfigTool ]; then
+    if ! pgrep -x PbxWebConfigToo > /dev/null 2>&1; then
+        log "Lansare 3CXLaunchWebConfigTool pe portul 5015..."
+        /usr/sbin/3CXLaunchWebConfigTool &
     fi
 fi
 

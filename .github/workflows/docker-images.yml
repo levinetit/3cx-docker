@@ -79,6 +79,7 @@ jobs:
         run: |
           # Pornire container cu systemd
           docker run -d --privileged --cgroupns=host \
+            -v /sys/fs/cgroup:/sys/fs/cgroup:rw \
             --name 3cx_stage1_c 3cx_stage1
 
           # Asteapta systemd sa fie gata

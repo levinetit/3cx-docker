@@ -169,9 +169,11 @@ jobs:
 
       - name: Create Release
         if: github.event.inputs.release == 'true'
-        # github.token (GITHUB_TOKEN) are deja contents:write -> poate crea release-uri
+        # GHCR_TOKEN = PAT al admin-ului (RepositoryRole admin) -> face bypass la
+        # ruleset-ul "tag create protections" pe refs/tags/v*. github.token (bot
+        # github-actions) NU e in bypass_actors -> 422 "creations being restricted".
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.GHCR_TOKEN }}
         run: |
           NOTES="Imagine 3CX Docker:
           > docker run levinetit/3cx:${{ env.IMAGE_TAG }}
@@ -179,7 +181,12 @@ jobs:
           Versiune 3cxpbx: ${{ env.package_version }}
           Changelog: https://www.3cx.com/blog/change-log/phone-system-change-log/"
 
-          gh release create "${{ env.IMAGE_TAG }}" \
-            --repo "${{ github.repository }}" \
-            --title "Release ${{ env.IMAGE_TAG }}" \
-            --notes "$NOTES" || echo "Release exista deja, sar peste."
+          # Sare doar daca release-ul exista deja; orice alta eroare ESUEAZA pasul
+          if gh release view "${{ env.IMAGE_TAG }}" --repo "${{ github.repository }}" >/dev/null 2>&1; then
+            echo "Release ${{ env.IMAGE_TAG }} exista deja, sar peste."
+          else
+            gh release create "${{ env.IMAGE_TAG }}" \
+              --repo "${{ github.repository }}" \
+              --title "Release ${{ env.IMAGE_TAG }}" \
+              --notes "$NOTES"
+          fi

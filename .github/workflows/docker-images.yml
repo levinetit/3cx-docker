@@ -51,11 +51,11 @@ jobs:
         shell: bash
 
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5.0.1
 
       - name: Login to DockerHub
         if: github.event.inputs.release == 'true'
-        uses: docker/login-action@v3.1.0
+        uses: docker/login-action@v4.2.0
         with:
           username: ${{ secrets.DOCKER_USER }}
           password: ${{ secrets.DOCKER_PASSWORD }}
@@ -65,7 +65,7 @@ jobs:
         # PAT (GHCR_TOKEN) cu write:packages: detine pachetul ghcr.io/levinetit/3cx
         # (preexistent) -> permite push. GITHUB_TOKEN da login OK dar push denied
         # pe pachet preexistent nelegat de repo.
-        uses: docker/login-action@v3.1.0
+        uses: docker/login-action@v4.2.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}

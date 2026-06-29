@@ -169,11 +169,11 @@ jobs:
 
       - name: Create Release
         if: github.event.inputs.release == 'true'
-        # GHCR_TOKEN = PAT al admin-ului (RepositoryRole admin) -> face bypass la
-        # ruleset-ul "tag create protections" pe refs/tags/v*. github.token (bot
-        # github-actions) NU e in bypass_actors -> 422 "creations being restricted".
+        # github.token (are contents:write) creeaza release + tag. Posibil dupa ce
+        # ruleset-ul "tag create protections" (1738010) a fost relaxat: regula
+        # 'creation' eliminata, ramane doar 'update' -> tag-uri noi v* permise.
         env:
-          GH_TOKEN: ${{ secrets.GHCR_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           NOTES="Imagine 3CX Docker:
           > docker run levinetit/3cx:${{ env.IMAGE_TAG }}

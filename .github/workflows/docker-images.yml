@@ -1,15 +1,20 @@
-name: docker images d
+name: Build 3CX Docker image
+
+# Anti-suprapunere: o singura rulare a build-ului in acelasi timp
+concurrency:
+  group: build-3cx
+  cancel-in-progress: false
 
 on:
   workflow_dispatch:
     inputs:
       release:
-        description: 'Publish release (untick for test only)'
-        default: 'true'
+        description: 'Publica release (debifeaza pentru test only)'
+        default: true
         required: true
         type: boolean
       debian_version:
-        description: 'Debian version (buster vs buster-testing)'
+        description: 'Versiune Debian a repo-ului 3CX (ex: bookworm)'
         default: 'bookworm'
         required: true
         type: string
@@ -23,26 +28,26 @@ jobs:
       actions: write
     steps:
       - name: Set build number
-        run: echo "BUILD_NUMBER=${{ vars.BUILD_NUMBER }}" >> $GITHUB_ENV
-
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y curl gzip python3-pip
-          pip3 install htmlq
-        shell: bash
+        # Default la 1 daca variabila de repo BUILD_NUMBER nu e setata
+        run: echo "BUILD_NUMBER=${{ vars.BUILD_NUMBER || '1' }}" >> "$GITHUB_ENV"
 
       - name: Get package version
+        # Determina ultima versiune 3cxpbx direct din repo-ul oficial (Packages.gz).
+        # Fara htmlq/changelog (era cod mort care strica build-ul).
         run: |
-          changelog=$(curl "https://www.3cx.com/blog/change-log/phone-system-change-log/" --silent | htmlq "h2 + ul" -1)
-          url=http://repo.3cx.com/3cx/dists/${{ github.event.inputs.debian_version }}/main/binary-amd64/Packages.gz
-          package=3cxpbx
-          package_version=$(curl -s $url | gunzip | grep -A 10 "^Package: $package$" | awk '/Version: / { print $2 }' | sort -r | head -1)
-          if [[ ! $(curl "https://www.3cx.com/blog/change-log/phone-system-change-log/" --silent | htmlq "h2" -1) == *"${package_version}"* ]]; then changelog=""; fi
-          major_version=$(echo $package_version | cut -d. -f1)
-          echo package_version=$package_version >> $GITHUB_ENV
-          echo major_version=$major_version >> $GITHUB_ENV
-          echo changelog=$changelog >> $GITHUB_ENV
+          set -uo pipefail
+          url="http://repo.3cx.com/3cx/dists/${{ github.event.inputs.debian_version }}/main/binary-amd64/Packages.gz"
+          package_version=$(curl -fsSL "$url" | gunzip \
+            | awk '/^Package: 3cxpbx$/{f=1} f&&/^Version: /{print $2; f=0}' \
+            | sort -rV | head -1)
+          if [ -z "$package_version" ]; then
+            echo "::error::Nu am putut determina versiunea 3cxpbx din $url"
+            exit 1
+          fi
+          major_version=${package_version%%.*}
+          echo "Versiune detectata: $package_version (major $major_version)"
+          echo "package_version=$package_version" >> "$GITHUB_ENV"
+          echo "major_version=$major_version" >> "$GITHUB_ENV"
         shell: bash
 
       - name: Checkout
@@ -57,11 +62,12 @@ jobs:
 
       - name: Login to GitHub Container Registry
         if: github.event.inputs.release == 'true'
+        # Foloseste GITHUB_TOKEN automat (avem packages:write) -> fara secret PAT de intretinut
         uses: docker/login-action@v3.1.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ secrets.GHCR_TOKEN }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build stage1 image
         run: |
@@ -77,21 +83,29 @@ jobs:
 
       - name: Install 3cxpbx in running container (stage2)
         run: |
+          set -uo pipefail
           # Pornire container cu systemd
           docker run -d --privileged --cgroupns=host \
             -v /sys/fs/cgroup:/sys/fs/cgroup:rw \
             --name 3cx_stage1_c 3cx_stage1
 
-          # Asteapta systemd sa fie gata
-          echo "Waiting for systemd..."
+          # Asteapta systemd sa fie gata (max ~200s)
+          echo "Astept systemd..."
+          ready=no
           for i in $(seq 1 40); do
             status=$(docker exec 3cx_stage1_c systemctl is-system-running 2>/dev/null || true)
             echo "[$i] $status"
-            if echo "$status" | grep -qE "running|degraded"; then break; fi
+            if echo "$status" | grep -qE "running|degraded"; then ready=yes; break; fi
             sleep 5
           done
+          if [ "$ready" != yes ]; then
+            echo "::error::systemd nu a pornit in container in timpul alocat"
+            docker exec 3cx_stage1_c systemctl --failed 2>/dev/null || true
+            docker logs 3cx_stage1_c 2>&1 | tail -50 || true
+            exit 1
+          fi
 
-          # Instaleaza 3cxpbx si activeaza servicii
+          # Instaleaza 3cxpbx si activeaza serviciile
           docker exec 3cx_stage1_c bash -c "
             systemctl mask systemd-logind console-getty.service container-getty@.service \
               getty-static.service getty@.service serial-getty@.service getty.target \
@@ -100,6 +114,13 @@ jobs:
             && systemctl enable nginx postgresql 3cx_fix_perms.service 3cx_autosetup.service \
             && (systemctl enable exim4 2>/dev/null || true)
           "
+
+          # Verifica ca 3cxpbx chiar s-a instalat inainte de commit
+          if ! docker exec 3cx_stage1_c dpkg -l 3cxpbx 2>/dev/null | grep -q '^ii'; then
+            echo "::error::3cxpbx nu s-a instalat corect in container"
+            docker logs 3cx_stage1_c 2>&1 | tail -50 || true
+            exit 1
+          fi
 
           docker stop 3cx_stage1_c
 
@@ -116,7 +137,7 @@ jobs:
           docker rm 3cx_stage1_c
           docker rmi 3cx_stage1
 
-          echo "IMAGE_TAG=${IMAGE_TAG}" >> $GITHUB_ENV
+          echo "IMAGE_TAG=${IMAGE_TAG}" >> "$GITHUB_ENV"
 
       - name: Push images (release only)
         if: github.event.inputs.release == 'true'
@@ -129,25 +150,34 @@ jobs:
 
       - name: Increment build number
         if: github.event.inputs.release == 'true'
+        env:
+          BUILD_NUMBER: ${{ vars.BUILD_NUMBER || '1' }}
         run: |
-          next=$(( ${{ vars.BUILD_NUMBER }} + 1 ))
-          curl -s -X PATCH \
+          next=$(( BUILD_NUMBER + 1 ))
+          code=$(curl -s -o /tmp/var_resp.json -w "%{http_code}" -X PATCH \
             -H "Authorization: token ${{ secrets.GHCR_TOKEN }}" \
-            -H "Accept: application/vnd.github.v3+json" \
+            -H "Accept: application/vnd.github+json" \
             "https://api.github.com/repos/${{ github.repository }}/actions/variables/BUILD_NUMBER" \
-            -d "{\"name\":\"BUILD_NUMBER\",\"value\":\"$next\"}"
+            -d "{\"name\":\"BUILD_NUMBER\",\"value\":\"$next\"}")
+          echo "PATCH BUILD_NUMBER -> HTTP $code (next=$next)"
+          if [ "$code" != "204" ]; then
+            cat /tmp/var_resp.json || true
+            echo "::warning::Nu am putut incrementa BUILD_NUMBER (GHCR_TOKEN are nevoie de scope 'Variables: read & write')"
+          fi
 
       - name: Create Release
         if: github.event.inputs.release == 'true'
+        # github.token (GITHUB_TOKEN) are deja contents:write -> poate crea release-uri
         env:
-          GH_TOKEN: ${{ secrets.GHCR_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
         run: |
-          NOTES="3CX docker image:
+          NOTES="Imagine 3CX Docker:
           > docker run levinetit/3cx:${{ env.IMAGE_TAG }}
 
-          https://www.3cx.com/blog/change-log/phone-system-change-log/"
+          Versiune 3cxpbx: ${{ env.package_version }}
+          Changelog: https://www.3cx.com/blog/change-log/phone-system-change-log/"
 
           gh release create "${{ env.IMAGE_TAG }}" \
             --repo "${{ github.repository }}" \
             --title "Release ${{ env.IMAGE_TAG }}" \
-            --notes "$NOTES" || echo "Release already exists, skipping."
+            --notes "$NOTES" || echo "Release exista deja, sar peste."
